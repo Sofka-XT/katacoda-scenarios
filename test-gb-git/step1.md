@@ -1,3 +1,3 @@
-Para corregir el siguiente error que sale al ejeuctar la siguiente linea:
+Que problema sale al ejecutar la siguiente linea de codigo:
 
-`git status'`{{execute}}
+`git status`{{execute}}
