@@ -1,4 +1,6 @@
-En esta serie de preguntas vamos a realizar algunos pasos para configurar el ambiente de MySQL. Lo primero es poner en ejecución el ambiente usando la siguiente instrucción:
+En esta serie de preguntas vamos a realizar algunos pasos para configurar el ambiente de MySQL. 
+
+Espere que termine de instalar el ambiente, ingrese un usuario y contraseña y por ultimo realice la ejecución el ambiente usando la siguiente instrucción para poder ingresar:
 
 `/usr/bin/mysql -u root -p`{{execute}}
 
