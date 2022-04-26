@@ -1,0 +1,1 @@
+Excelente trabajo. Haz finalizado con exito esta diagnostico de Git a nivel practico.
