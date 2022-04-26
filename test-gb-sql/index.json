@@ -36,7 +36,7 @@
     },
     "assets": {
 			"host01": [
-				{ "file": "db.sql", "target": "/root/"}
+				{ "file": "db.sql", "target": "/root"}
 			]
 		}
   },
