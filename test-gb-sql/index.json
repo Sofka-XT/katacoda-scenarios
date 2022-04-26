@@ -3,6 +3,7 @@
   "description": "Evaluaciones de SQL para Banco General de Panama",
   "difficulty": "Intermediate",
   "time": "20",
+  "noindex": true,
   "details": {
     "steps": [
       {
@@ -40,6 +41,7 @@
 		}
   },
   "environment": {
+    "hideintro": true, "hidefinish": true,
     "uilayout": "terminal"
   },
   
