@@ -1,0 +1,1 @@
+En esta serie de preguntas vamos a explorar conceptos de SQL unsado una base de datos relacional MySQL.
