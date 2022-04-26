@@ -4,5 +4,5 @@ En esta serie de preguntas vamos a realizar algunos pasos para configurar el amb
 
 *Migrar datos*
 - `CREATE DATABASE books`{{execute}}
-- `source db.sql`
+- `source db.sql`{{execute}}
 
