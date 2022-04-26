@@ -35,8 +35,8 @@
       "text": "finish.md"
     },
     "assets": {
-			"client": [
-				{ "file": "db.sql", "target": "/root", "chmod": "+x" }
+			"host01": [
+				{ "file": "db.sql", "target": "/root/"}
 			]
 		}
   },
