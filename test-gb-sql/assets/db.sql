@@ -1,308 +1,225 @@
--- MySQL Workbench Forward Engineering
-
-SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
-SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
-SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
-
--- -----------------------------------------------------
--- Schema books
--- -----------------------------------------------------
-DROP SCHEMA IF EXISTS `books` ;
-
--- -----------------------------------------------------
--- Schema books
--- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `books` DEFAULT CHARACTER SET latin1 ;
-USE `books` ;
-
--- -----------------------------------------------------
--- Table `books`.`person`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `books`.`person` ;
-
-CREATE TABLE IF NOT EXISTS `books`.`person` (
-  `person_id` INT(10) NOT NULL AUTO_INCREMENT,
-  `first_name` VARCHAR(20) NULL DEFAULT NULL,
-  `middle_name` VARCHAR(20) NULL DEFAULT NULL,
-  `last_name` VARCHAR(20) NOT NULL,
-  PRIMARY KEY (`person_id`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = latin1;
 
 
--- -----------------------------------------------------
--- Table `books`.`book_title`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `books`.`book_title` ;
-
-CREATE TABLE IF NOT EXISTS `books`.`book_title` (
-  `book_title_id` INT(10) NOT NULL,
-  `title` VARCHAR(255) NOT NULL,
-  `subtitle` VARCHAR(255) NULL,
-  `volume` INT(10) NULL,
-  `volume_title` VARCHAR(255) NULL,
-  PRIMARY KEY (`book_title_id`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = latin1;
+CREATE DATABASE Company ;
 
 
--- -----------------------------------------------------
--- Table `books`.`publisher`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `books`.`publisher` ;
 
-CREATE TABLE IF NOT EXISTS `books`.`publisher` (
-  `publisher_id` INT(10) NOT NULL AUTO_INCREMENT,
-  `publisher_name` VARCHAR(45) NOT NULL,
-  `url` VARCHAR(255) NULL,
-  PRIMARY KEY (`publisher_id`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = latin1;
+USE Company;
 
+CREATE TABLE DEPARTMENT (
+  dname        varchar(25) not null,
+  dnumber      int not null,
+  mgrssn      char(9) not null, 
+  mgrstartdate date,
+  CONSTRAINT pk_Department primary key (dnumber),
+  CONSTRAINT uk_dname UNIQUE (dname) 
+);
 
--- -----------------------------------------------------
--- Table `books`.`series`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `books`.`series` ;
+#DROP TABLE EMPLOYEE;'
+CREATE TABLE EMPLOYEE (
+  fname    varchar(15) not null, 
+  minit    varchar(1),
+  lname    varchar(15) not null,
+  ssn     char(9), 
+  bdate    date,
+  address  varchar(50),
+  sex      char,
+  salary   decimal(10,2),
+  superssn char(9),
+  dno      int,
+  CONSTRAINT pk_employee primary key (ssn),
+  #'--CONSTRAINT fk_employee_employee foreign key (superssn) references EMPLOYEE(ssn), -- Constraint Will be added later to prevent cyclic referential itegrity violation'
+  CONSTRAINT fk_employee_department foreign key (dno) references DEPARTMENT(dnumber)
+);
 
-CREATE TABLE IF NOT EXISTS `books`.`series` (
-  `series_id` INT(10) NOT NULL AUTO_INCREMENT,
-  `series_name` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`series_id`))
-ENGINE = InnoDB
-KEY_BLOCK_SIZE = 16;
+#'--DROP TABLE DEPENDENT;'
+CREATE TABLE DEPENDENT (
+  essn           char(9),
+  dependent_name varchar(15),
+  sex            char,
+  bdate          date,
+  relationship   varchar(8),
+  CONSTRAINT pk_essn_dependent_name primary key (essn,dependent_name),
+  CONSTRAINT fk_dependent_employee foreign key (essn) references EMPLOYEE(ssn)
+);
 
+#'--DROP TABLE DEPT_LOCATIONS;'
+CREATE TABLE DEPT_LOCATIONS (
+  dnumber   int,
+  dlocation varchar(15), 
+  CONSTRAINT pk_dept_locations primary key (dnumber,dlocation),
+  CONSTRAINT fk_deptlocations_department foreign key (dnumber) references DEPARTMENT(dnumber)
+);
 
--- -----------------------------------------------------
--- Table `books`.`book`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `books`.`book` ;
+#'--DROP TABLE PROJECT;'
+CREATE TABLE PROJECT (
+  pname      varchar(25) not null,
+  pnumber    int,
+  plocation  varchar(15),
+  dnum       int not null,
+  CONSTRAINT ok_project primary key (pnumber),
+  CONSTRAINT uc_pnumber unique (pname),
+  CONSTRAINT fk_project_department foreign key (dnum) references DEPARTMENT(dnumber)
+);
 
-CREATE TABLE IF NOT EXISTS `books`.`book` (
-  `book_id` INT NOT NULL AUTO_INCREMENT,
-  `book_title_id` INT(10) NOT NULL,
-  `publisher_id` INT(10) NOT NULL,
-  `series_id` INT(10) NULL,
-  `edition` INT(10) NOT NULL DEFAULT 1,
-  `isbn10` VARCHAR(10) NULL,
-  `isbn13` VARCHAR(13) NULL,
-  `url` VARCHAR(255) NULL,
-  PRIMARY KEY (`book_id`),
-  INDEX `fk_book_has_book_title_idx` (`book_title_id` ASC) VISIBLE,
-  INDEX `fk_book_publisher1_idx` (`publisher_id` ASC) VISIBLE,
-  INDEX `fk_book_series1_idx` (`series_id` ASC) VISIBLE,
-  CONSTRAINT `fk_book_edition_book_title1`
-    FOREIGN KEY (`book_title_id`)
-    REFERENCES `books`.`book_title` (`book_title_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_book_publisher1`
-    FOREIGN KEY (`publisher_id`)
-    REFERENCES `books`.`publisher` (`publisher_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_book_series1`
-    FOREIGN KEY (`series_id`)
-    REFERENCES `books`.`series` (`series_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `books`.`book_author`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `books`.`book_author` ;
-
-CREATE TABLE IF NOT EXISTS `books`.`book_author` (
-  `book_id` INT NOT NULL,
-  `person_id` INT(10) NOT NULL,
-  INDEX `fk_book_author_has_book_idx` (`book_id` ASC) VISIBLE,
-  INDEX `fk_book_author_person1_idx` (`person_id` ASC) VISIBLE,
-  CONSTRAINT `fk_book_author_book1`
-    FOREIGN KEY (`book_id`)
-    REFERENCES `books`.`book` (`book_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_book_author_person1`
-    FOREIGN KEY (`person_id`)
-    REFERENCES `books`.`person` (`person_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+#'--DROP TABLE WORKS_ON;'
+CREATE TABLE WORKS_ON (
+  essn   char(9),
+  pno    int,
+  hours  decimal(4,1),
+  CONSTRAINT pk_worksOn primary key (essn,pno),
+  CONSTRAINT fk_workson_employee foreign key (essn) references EMPLOYEE(ssn),
+  CONSTRAINT fk_workson_project foreign key (pno) references PROJECT(pnumber)
+);
 
 
--- -----------------------------------------------------
--- Table `books`.`book_retailer`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `books`.`book_retailer` ;
 
-CREATE TABLE IF NOT EXISTS `books`.`book_retailer` (
-  `book_retailer_id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(45) NOT NULL,
-  `url` VARCHAR(255) NULL,
-  PRIMARY KEY (`book_retailer_id`))
-ENGINE = InnoDB;
+#'--Insert Statements'
+use Company;
+INSERT INTO DEPARTMENT VALUES ('Research','5','333445555','1978-05-22');
+INSERT INTO DEPARTMENT VALUES ('Administration','4','987654321','1985-01-01');
+INSERT INTO DEPARTMENT VALUES ('Headquarters','1','888665555','1971-06-19');
+INSERT INTO DEPARTMENT VALUES ('Software','6','111111100','1999-05-15');
+INSERT INTO DEPARTMENT VALUES ('Hardware','7','444444400','1998-05-15');
+INSERT INTO DEPARTMENT VALUES ('Sales','8','555555500','1997-01-01');
 
-
--- -----------------------------------------------------
--- Table `books`.`book_purchase`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `books`.`book_purchase` ;
-
-CREATE TABLE IF NOT EXISTS `books`.`book_purchase` (
-  `book_id` INT NOT NULL,
-  `book_retailer_id` INT NOT NULL,
-  `purchase_price` DOUBLE NULL,
-  `purchase_date` DATE NULL,
-  INDEX `fk_book_purchase_has_book_retailer_idx` (`book_retailer_id` ASC) VISIBLE,
-  INDEX `fk_book_purchase_has_book_idx` (`book_id` ASC) VISIBLE,
-  CONSTRAINT `fk_book_purchase_book_retailer1`
-    FOREIGN KEY (`book_retailer_id`)
-    REFERENCES `books`.`book_retailer` (`book_retailer_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_book_purchase_book1`
-    FOREIGN KEY (`book_id`)
-    REFERENCES `books`.`book` (`book_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
-SET SQL_MODE=@OLD_SQL_MODE;
-SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
-SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
-
--- -----------------------------------------------------
--- Data for table `books`.`person`
--- -----------------------------------------------------
-START TRANSACTION;
-USE `books`;
-INSERT INTO `books`.`person` (`person_id`, `first_name`, `middle_name`, `last_name`) VALUES (1, 'Christian', NULL, 'Bauer');
-INSERT INTO `books`.`person` (`person_id`, `first_name`, `middle_name`, `last_name`) VALUES (2, 'Gavin', NULL, 'King');
-INSERT INTO `books`.`person` (`person_id`, `first_name`, `middle_name`, `last_name`) VALUES (3, 'Gary', NULL, 'Mak');
-INSERT INTO `books`.`person` (`person_id`, `first_name`, `middle_name`, `last_name`) VALUES (4, 'Josh', NULL, 'Long');
-INSERT INTO `books`.`person` (`person_id`, `first_name`, `middle_name`, `last_name`) VALUES (5, 'Daniel', NULL, 'Rubio');
-INSERT INTO `books`.`person` (`person_id`, `first_name`, `middle_name`, `last_name`) VALUES (6, 'Craig', NULL, 'Walls');
-INSERT INTO `books`.`person` (`person_id`, `first_name`, `middle_name`, `last_name`) VALUES (7, 'Andrew', NULL, 'Hunt');
-INSERT INTO `books`.`person` (`person_id`, `first_name`, `middle_name`, `last_name`) VALUES (8, 'David', NULL, 'Thomas');
-INSERT INTO `books`.`person` (`person_id`, `first_name`, `middle_name`, `last_name`) VALUES (9, 'Huw', NULL, 'Collingbourne');
-INSERT INTO `books`.`person` (`person_id`, `first_name`, `middle_name`, `last_name`) VALUES (10, 'Brian', 'W', 'Kernighan');
-INSERT INTO `books`.`person` (`person_id`, `first_name`, `middle_name`, `last_name`) VALUES (11, 'Dennis', 'MacAlistar', 'Ritchie');
-INSERT INTO `books`.`person` (`person_id`, `first_name`, `middle_name`, `last_name`) VALUES (12, 'Scott', NULL, 'Meyers');
-INSERT INTO `books`.`person` (`person_id`, `first_name`, `middle_name`, `last_name`) VALUES (13, 'Kent', NULL, 'Beck');
-INSERT INTO `books`.`person` (`person_id`, `first_name`, `middle_name`, `last_name`) VALUES (14, 'Eric', NULL, 'Freeman');
-INSERT INTO `books`.`person` (`person_id`, `first_name`, `middle_name`, `last_name`) VALUES (15, 'Elisabeth', NULL, 'Robson');
-INSERT INTO `books`.`person` (`person_id`, `first_name`, `middle_name`, `last_name`) VALUES (16, 'Katamreddy Siva', 'Prasad', 'Reddy');
-
-COMMIT;
+INSERT INTO EMPLOYEE VALUES ('Bob','B','Bender','666666600','1968-04-17','8794 Garfield, Chicago, IL','M','96000.00',NULL,'8' );
+INSERT INTO EMPLOYEE VALUES ('Kim','C','Grace','333333300','1970-10-23','6677 Mills Ave, Sacramento, CA','F','79000.00',NULL,'6'); 
+INSERT INTO EMPLOYEE VALUES ('James','E','Borg','888665555','1927-11-10','450 Stone, Houston, TX','M','55000.00',NULL,'1'); 
+INSERT INTO EMPLOYEE VALUES ('Alex','D','Freed','444444400','1950-10-09','4333 Pillsbury, Milwaukee, WI','M','89000.00',NULL,'7'); 
+INSERT INTO EMPLOYEE VALUES ('Evan','E','Wallis','222222200','1958-01-16','134 Pelham, Milwaukee, WI','M','92000.00',NULL,'7'); 
+INSERT INTO EMPLOYEE VALUES ('Jared','D','James','111111100','1966-10-10','123 Peachtree, Atlanta, GA','M','85000.00',NULL,'6'); 
+INSERT INTO EMPLOYEE VALUES ('John','C','James','555555500','1975-06-30','7676 Bloomington, Sacramento, CA','M','81000.00',NULL,'6'); 
+INSERT INTO EMPLOYEE VALUES ('Andy','C','Vile','222222202','1944-06-21','1967 Jordan, Milwaukee, WI','M','53000.00','222222200','7'); 
+INSERT INTO EMPLOYEE VALUES ('Brad','C','Knight','111111103','1968-02-13','176 Main St., Atlanta, GA','M','44000.00','111111100','6'); 
+INSERT INTO EMPLOYEE VALUES ('Josh','U','Zell','222222201','1954-05-22','266 McGrady, Milwaukee, WI','M','56000.00','222222200','7'); 
+INSERT INTO EMPLOYEE VALUES ('Justin','n','Mark','111111102','1966-01-12','2342 May, Atlanta, GA','M','40000.00','111111100','6'); 
+INSERT INTO EMPLOYEE VALUES ('Jon','C','Jones','111111101','1967-11-14','111 Allgood, Atlanta, GA','M','45000.00','111111100','6'); 
+INSERT INTO EMPLOYEE VALUES ('Ahmad','V','Jabbar','987987987','1959-03-29','980 Dallas, Houston, TX','M','25000.00','987654321','4'); 
+INSERT INTO EMPLOYEE VALUES ('Joyce','A','English','453453453','1962-07-31','5631 Rice, Houston, TX','F','25000.00','333445555','5'); 
+INSERT INTO EMPLOYEE VALUES ('Ramesh','K','Narayan','666884444','1952-09-15','971 Fire Oak, Humble, TX','M','38000.00','333445555','5'); 
+INSERT INTO EMPLOYEE VALUES ('Alicia','J','Zelaya','999887777','1958-07-19','3321 Castle, Spring, TX','F','25000.00','987654321','4'); 
+INSERT INTO EMPLOYEE VALUES ('John','B','Smith','123456789','1955-01-09','731 Fondren, Houston, TX','M','30000.00','333445555','5'); 
+INSERT INTO EMPLOYEE VALUES ('Jennifer','S','Wallace','987654321','1931-06-20','291 Berry, Bellaire, TX','F','43000.00','888665555','4'); 
+INSERT INTO EMPLOYEE VALUES ('Franklin','T','Wong','333445555','1945-12-08','638 Voss, Houston, TX','M','40000.00','888665555','5'); 
+INSERT INTO EMPLOYEE VALUES ('Tom','G','Brand','222222203','1966-12-16','112 Third St, Milwaukee, WI','M','62500.00','222222200','7'); 
+INSERT INTO EMPLOYEE VALUES ('Jenny','F','Vos','222222204','1967-11-11','263 Mayberry, Milwaukee, WI','F','61000.00','222222201','7'); 
+INSERT INTO EMPLOYEE VALUES ('Chris','A','Carter','222222205','1960-03-21','565 Jordan, Milwaukee, WI','F','43000.00','222222201','7'); 
+INSERT INTO EMPLOYEE VALUES ('Jeff','H','Chase','333333301','1970-01-07','145 Bradbury, Sacramento, CA','M','44000.00','333333300','6'); 
+INSERT INTO EMPLOYEE VALUES ('Bonnie','S','Bays','444444401','1956-06-19','111 Hollow, Milwaukee, WI','F','70000.00','444444400','7'); 
+INSERT INTO EMPLOYEE VALUES ('Alec','C','Best','444444402','1966-06-18','233 Solid, Milwaukee, WI','M','60000.00','444444400','7'); 
+INSERT INTO EMPLOYEE VALUES ('Sam','S','Snedden','444444403','1977-07-31','987 Windy St, Milwaukee, WI','M','48000.00','444444400','7'); 
+INSERT INTO EMPLOYEE VALUES ('Nandita','K','Ball','555555501','1969-04-16','222 Howard, Sacramento, CA','M','62000.00','555555500','6'); 
+INSERT INTO EMPLOYEE VALUES ('Jill','J','Jarvis','666666601','1966-01-14','6234 Lincoln, Chicago, IL','F','36000.00','666666600','8'); 
+INSERT INTO EMPLOYEE VALUES ('Kate','W','King','666666602','1966-04-16','1976 Boone Trace, Chicago, IL','F','44000.00','666666600','8'); 
+INSERT INTO EMPLOYEE VALUES ('Lyle','G','Leslie','666666603','1963-06-09','417 Hancock Ave, Chicago, IL','M','41000.00','666666601','8'); 
+INSERT INTO EMPLOYEE VALUES ('Billie','J','King','666666604','1960-01-01','556 Washington, Chicago, IL','F','38000.00','666666603','8'); 
+INSERT INTO EMPLOYEE VALUES ('Jon','A','Kramer','666666605','1964-08-22','1988 Windy Creek, Seattle, WA','M','41500.00','666666603','8'); 
+INSERT INTO EMPLOYEE VALUES ('Ray','H','King','666666606','1949-08-16','213 Delk Road, Seattle, WA','M','44500.00','666666604','8'); 
+INSERT INTO EMPLOYEE VALUES ('Gerald','D','Small','666666607','1962-05-15','122 Ball Street, Dallas, TX','M','29000.00','666666602','8'); 
+INSERT INTO EMPLOYEE VALUES ('Arnold','A','Head','666666608','1967-05-19','233 Spring St, Dallas, TX','M','33000.00','666666602','8'); 
+INSERT INTO EMPLOYEE VALUES ('Helga','C','Pataki','666666609','1969-03-11','101 Holyoke St, Dallas, TX','F','32000.00','666666602','8'); 
+INSERT INTO EMPLOYEE VALUES ('Naveen','B','Drew','666666610','1970-05-23','198 Elm St, Philadelphia, PA','M','34000.00','666666607','8'); 
+INSERT INTO EMPLOYEE VALUES ('Carl','E','Reedy','666666611','1977-06-21','213 Ball St, Philadelphia, PA','M','32000.00','666666610','8'); 
+INSERT INTO EMPLOYEE VALUES ('Sammy','G','Hall','666666612','1970-01-11','433 Main Street, Miami, FL','M','37000.00','666666611','8'); 
+INSERT INTO EMPLOYEE VALUES ('Red','A','Bacher','666666613','1980-05-21','196 Elm Street, Miami, FL','M','33500.00','666666612','8'); 
 
 
--- -----------------------------------------------------
--- Data for table `books`.`book_title`
--- -----------------------------------------------------
-START TRANSACTION;
-USE `books`;
-INSERT INTO `books`.`book_title` (`book_title_id`, `title`, `subtitle`, `volume`, `volume_title`) VALUES (1, 'The C Programming Language', 'ANSI C', NULL, NULL);
-INSERT INTO `books`.`book_title` (`book_title_id`, `title`, `subtitle`, `volume`, `volume_title`) VALUES (2, 'Effective C++', '50 Specific Ways to Improve Your Programs and Designs', NULL, NULL);
-INSERT INTO `books`.`book_title` (`book_title_id`, `title`, `subtitle`, `volume`, `volume_title`) VALUES (3, 'Spring In Action', NULL, NULL, NULL);
-INSERT INTO `books`.`book_title` (`book_title_id`, `title`, `subtitle`, `volume`, `volume_title`) VALUES (4, 'The Little Book of Adventure Game Programming in Java', NULL, NULL, NULL);
-INSERT INTO `books`.`book_title` (`book_title_id`, `title`, `subtitle`, `volume`, `volume_title`) VALUES (5, 'The Pragmatic Programmer', 'from journeyman to master', NULL, NULL);
-INSERT INTO `books`.`book_title` (`book_title_id`, `title`, `subtitle`, `volume`, `volume_title`) VALUES (6, 'Test-Driven Development', 'By Example', NULL, NULL);
-INSERT INTO `books`.`book_title` (`book_title_id`, `title`, `subtitle`, `volume`, `volume_title`) VALUES (7, 'Head First Design Patterns', 'Building Extensible & Maintainable Object-Oriented Software', NULL, NULL);
-INSERT INTO `books`.`book_title` (`book_title_id`, `title`, `subtitle`, `volume`, `volume_title`) VALUES (8, 'Java Persistence with MyBatis 3', 'A practical guide to MyBatis, a simple yet  powerful Java Persistence Framework!', NULL, NULL);
 
-COMMIT;
+INSERT INTO DEPENDENT VALUES ('333445555','Alice','F','1976-04-05','Daughter'); 
+INSERT INTO DEPENDENT VALUES ('333445555','Theodore','M','1973-10-25','Son'); 
+INSERT INTO DEPENDENT VALUES ('333445555','Joy','F','1948-05-03','Spouse'); 
+INSERT INTO DEPENDENT VALUES ('987654321','Abner','M','1932-02-29','Spouse'); 
+INSERT INTO DEPENDENT VALUES ('123456789','Michael','M','1978-01-01','Son'); 
+INSERT INTO DEPENDENT VALUES ('123456789','Alice','F','1978-12-31','Daughter'); 
+INSERT INTO DEPENDENT VALUES ('123456789','Elizabeth','F',Null,'Spouse'); -- Converted to Null as '0000-00-00' is an invalid date in SQL SERVER
+INSERT INTO DEPENDENT VALUES ('444444400','Johnny','M','1997-04-04','Son'); 
+INSERT INTO DEPENDENT VALUES ('444444400','Tommy','M','1999-06-07','Son'); 
+INSERT INTO DEPENDENT VALUES ('444444401','Chris','M','1969-04-19','Spouse'); 
+INSERT INTO DEPENDENT VALUES ('444444402','Sam','M','1964-02-14','Spouse');  
 
-
--- -----------------------------------------------------
--- Data for table `books`.`publisher`
--- -----------------------------------------------------
-START TRANSACTION;
-USE `books`;
-INSERT INTO `books`.`publisher` (`publisher_id`, `publisher_name`, `url`) VALUES (1, 'Manning Publications Co.', 'http://www.manning.com');
-INSERT INTO `books`.`publisher` (`publisher_id`, `publisher_name`, `url`) VALUES (2, 'Apress', 'http://www.apress.com');
-INSERT INTO `books`.`publisher` (`publisher_id`, `publisher_name`, `url`) VALUES (3, 'Packt Publishing Ltd.', 'http://packtpub.com');
-INSERT INTO `books`.`publisher` (`publisher_id`, `publisher_name`, `url`) VALUES (4, 'bitwise books', 'http://www.bitwisebooks.com');
-INSERT INTO `books`.`publisher` (`publisher_id`, `publisher_name`, `url`) VALUES (5, 'Addison-Wesley', NULL);
-INSERT INTO `books`.`publisher` (`publisher_id`, `publisher_name`, `url`) VALUES (6, 'Prentice Hall Software Series', NULL);
-INSERT INTO `books`.`publisher` (`publisher_id`, `publisher_name`, `url`) VALUES (7, 'O\'Reilly Media, Inc.', 'https://www.oreilly.com/');
-
-COMMIT;
+INSERT INTO DEPT_LOCATIONS VALUES ('1','Houston'); 
+INSERT INTO DEPT_LOCATIONS VALUES ('4','Stafford'); 
+INSERT INTO DEPT_LOCATIONS VALUES ('5','Bellaire'); 
+INSERT INTO DEPT_LOCATIONS VALUES ('5','Houston'); 
+INSERT INTO DEPT_LOCATIONS VALUES ('5','Sugarland'); 
+INSERT INTO DEPT_LOCATIONS VALUES ('6','Atlanta'); 
+INSERT INTO DEPT_LOCATIONS VALUES ('6','Sacramento'); 
+INSERT INTO DEPT_LOCATIONS VALUES ('7','Milwaukee'); 
+INSERT INTO DEPT_LOCATIONS VALUES ('8','Chicago'); 
+INSERT INTO DEPT_LOCATIONS VALUES ('8','Dallas'); 
+INSERT INTO DEPT_LOCATIONS VALUES ('8','Miami'); 
+INSERT INTO DEPT_LOCATIONS VALUES ('8','Philadephia'); 
+INSERT INTO DEPT_LOCATIONS VALUES ('8','Seattle'); 
 
 
--- -----------------------------------------------------
--- Data for table `books`.`series`
--- -----------------------------------------------------
-START TRANSACTION;
-USE `books`;
-INSERT INTO `books`.`series` (`series_id`, `series_name`) VALUES (1, 'In Action');
-INSERT INTO `books`.`series` (`series_id`, `series_name`) VALUES (2, 'The Little Book of');
-INSERT INTO `books`.`series` (`series_id`, `series_name`) VALUES (3, 'Addison-Wesley Professional Computing Series');
-INSERT INTO `books`.`series` (`series_id`, `series_name`) VALUES (4, 'The Addison-Wesley Signature Series');
-INSERT INTO `books`.`series` (`series_id`, `series_name`) VALUES (5, 'Head First');
-
-COMMIT;
 
 
--- -----------------------------------------------------
--- Data for table `books`.`book`
--- -----------------------------------------------------
-START TRANSACTION;
-USE `books`;
-INSERT INTO `books`.`book` (`book_id`, `book_title_id`, `publisher_id`, `series_id`, `edition`, `isbn10`, `isbn13`, `url`) VALUES (1, 3, 1, 1, 5, NULL, '9781617294945', 'https://www.manning.com/books/spring-in-action-fifth-edition');
-INSERT INTO `books`.`book` (`book_id`, `book_title_id`, `publisher_id`, `series_id`, `edition`, `isbn10`, `isbn13`, `url`) VALUES (2, 4, 4, 2, 1, NULL, '9781913132132', 'http://bitwisebooks.com/books/little-book-of-adventure-game-programming-in-java/');
-INSERT INTO `books`.`book` (`book_id`, `book_title_id`, `publisher_id`, `series_id`, `edition`, `isbn10`, `isbn13`, `url`) VALUES (3, 5, 5, NULL, 1, '020161622X', NULL, NULL);
-INSERT INTO `books`.`book` (`book_id`, `book_title_id`, `publisher_id`, `series_id`, `edition`, `isbn10`, `isbn13`, `url`) VALUES (4, 1, 6, NULL, 2, '0131103709', NULL, NULL);
-INSERT INTO `books`.`book` (`book_id`, `book_title_id`, `publisher_id`, `series_id`, `edition`, `isbn10`, `isbn13`, `url`) VALUES (5, 2, 5, 3, 1, '0201563649', NULL, NULL);
-INSERT INTO `books`.`book` (`book_id`, `book_title_id`, `publisher_id`, `series_id`, `edition`, `isbn10`, `isbn13`, `url`) VALUES (6, 6, 5, 4, 1, '0321146530', '9780321146533', NULL);
-INSERT INTO `books`.`book` (`book_id`, `book_title_id`, `publisher_id`, `series_id`, `edition`, `isbn10`, `isbn13`, `url`) VALUES (7, 7, 7, 5, 2, NULL, '9781492078005', 'https://www.oreilly.com/library/view/head-first-design/9781492077992/');
-INSERT INTO `books`.`book` (`book_id`, `book_title_id`, `publisher_id`, `series_id`, `edition`, `isbn10`, `isbn13`, `url`) VALUES (8, 8, 3, NULL, 1, NULL, '9787782166801', 'https://www.packtpub.com/product/java-persistence-with-mybatis-3/9781782166801');
-
-COMMIT;
+INSERT INTO PROJECT VALUES ('ProductX','1','Bellaire','5'); 
+INSERT INTO PROJECT VALUES ('ProductY','2','Sugarland','5'); 
+INSERT INTO PROJECT VALUES ('ProductZ','3','Houston','5'); 
+INSERT INTO PROJECT VALUES ('Computerization','10','Stafford','4'); 
+INSERT INTO PROJECT VALUES ('Reorganization','20','Houston','1'); 
+INSERT INTO PROJECT VALUES ('Newbenefits','30','Stafford','4'); 
+INSERT INTO PROJECT VALUES ('OperatingSystems','61','Jacksonville','6'); 
+INSERT INTO PROJECT VALUES ('DatabaseSystems','62','Birmingham','6'); 
+INSERT INTO PROJECT VALUES ('Middleware','63','Jackson','6'); 
+INSERT INTO PROJECT VALUES ('InkjetPrinters','91','Phoenix','7'); 
+INSERT INTO PROJECT VALUES ('LaserPrinters','92','LasVegas','7'); 
 
 
--- -----------------------------------------------------
--- Data for table `books`.`book_author`
--- -----------------------------------------------------
-START TRANSACTION;
-USE `books`;
-INSERT INTO `books`.`book_author` (`book_id`, `person_id`) VALUES (1, 6);
-INSERT INTO `books`.`book_author` (`book_id`, `person_id`) VALUES (3, 7);
-INSERT INTO `books`.`book_author` (`book_id`, `person_id`) VALUES (3, 8);
-INSERT INTO `books`.`book_author` (`book_id`, `person_id`) VALUES (2, 9);
-INSERT INTO `books`.`book_author` (`book_id`, `person_id`) VALUES (4, 10);
-INSERT INTO `books`.`book_author` (`book_id`, `person_id`) VALUES (4, 11);
-INSERT INTO `books`.`book_author` (`book_id`, `person_id`) VALUES (5, 12);
-INSERT INTO `books`.`book_author` (`book_id`, `person_id`) VALUES (6, 13);
-INSERT INTO `books`.`book_author` (`book_id`, `person_id`) VALUES (7, 14);
-INSERT INTO `books`.`book_author` (`book_id`, `person_id`) VALUES (7, 15);
-INSERT INTO `books`.`book_author` (`book_id`, `person_id`) VALUES (8, 16);
+INSERT INTO WORKS_ON VALUES ('123456789','1','32.5'); 
+INSERT INTO WORKS_ON VALUES ('123456789','2','7.5'); 
+INSERT INTO WORKS_ON VALUES ('666884444','3','40.0'); 
+INSERT INTO WORKS_ON VALUES ('453453453','1','20.0'); 
+INSERT INTO WORKS_ON VALUES ('453453453','2','20.0'); 
+INSERT INTO WORKS_ON VALUES ('333445555','2','10.0'); 
+INSERT INTO WORKS_ON VALUES ('333445555','3','10.0'); 
+INSERT INTO WORKS_ON VALUES ('333445555','10','10.0'); 
+INSERT INTO WORKS_ON VALUES ('333445555','20','10.0'); 
+INSERT INTO WORKS_ON VALUES ('999887777','30','30.0'); 
+INSERT INTO WORKS_ON VALUES ('999887777','10','10.0'); 
+INSERT INTO WORKS_ON VALUES ('987987987','10','35.0'); 
+INSERT INTO WORKS_ON VALUES ('987987987','30','5.0'); 
+INSERT INTO WORKS_ON VALUES ('987654321','30','20.0'); 
+INSERT INTO WORKS_ON VALUES ('987654321','20','15.0'); 
+INSERT INTO WORKS_ON VALUES ('888665555','20','0.0'); 
+INSERT INTO WORKS_ON VALUES ('111111100','61','40.0'); 
+INSERT INTO WORKS_ON VALUES ('111111101','61','40.0'); 
+INSERT INTO WORKS_ON VALUES ('111111102','61','40.0'); 
+INSERT INTO WORKS_ON VALUES ('111111103','61','40.0'); 
+INSERT INTO WORKS_ON VALUES ('222222200','62','40.0'); 
+INSERT INTO WORKS_ON VALUES ('222222201','62','48.0'); 
+INSERT INTO WORKS_ON VALUES ('222222202','62','40.0'); 
+INSERT INTO WORKS_ON VALUES ('222222203','62','40.0'); 
+INSERT INTO WORKS_ON VALUES ('222222204','62','40.0'); 
+INSERT INTO WORKS_ON VALUES ('222222205','62','40.0'); 
+INSERT INTO WORKS_ON VALUES ('333333300','63','40.0'); 
+INSERT INTO WORKS_ON VALUES ('333333301','63','46.0'); 
+INSERT INTO WORKS_ON VALUES ('444444400','91','40.0'); 
+INSERT INTO WORKS_ON VALUES ('444444401','91','40.0'); 
+INSERT INTO WORKS_ON VALUES ('444444402','91','40.0'); 
+INSERT INTO WORKS_ON VALUES ('444444403','91','40.0'); 
+INSERT INTO WORKS_ON VALUES ('555555500','92','40.0'); 
+INSERT INTO WORKS_ON VALUES ('555555501','92','44.0'); 
+INSERT INTO WORKS_ON VALUES ('666666601','91','40.0'); 
+INSERT INTO WORKS_ON VALUES ('666666603','91','40.0'); 
+INSERT INTO WORKS_ON VALUES ('666666604','91','40.0'); 
+INSERT INTO WORKS_ON VALUES ('666666605','92','40.0'); 
+INSERT INTO WORKS_ON VALUES ('666666606','91','40.0'); 
+INSERT INTO WORKS_ON VALUES ('666666607','61','40.0'); 
+INSERT INTO WORKS_ON VALUES ('666666608','62','40.0'); 
+INSERT INTO WORKS_ON VALUES ('666666609','63','40.0'); 
+INSERT INTO WORKS_ON VALUES ('666666610','61','40.0'); 
+INSERT INTO WORKS_ON VALUES ('666666611','61','40.0'); 
+INSERT INTO WORKS_ON VALUES ('666666612','61','40.0'); 
+INSERT INTO WORKS_ON VALUES ('666666613','61','30.0'); 
+INSERT INTO WORKS_ON VALUES ('666666613','62','10.0'); 
+INSERT INTO WORKS_ON VALUES ('666666613','63','10.0'); 
 
-COMMIT;
 
 
--- -----------------------------------------------------
--- Data for table `books`.`book_retailer`
--- -----------------------------------------------------
-START TRANSACTION;
-USE `books`;
-INSERT INTO `books`.`book_retailer` (`book_retailer_id`, `name`, `url`) VALUES (1, 'Amazon', 'http://www.amazon.com');
+#'--Adding constraint after loading data into system'
+Alter table EMPLOYEE
+ADD CONSTRAINT fk_employee_employee foreign key (superssn) references EMPLOYEE(ssn);
 
-COMMIT;
-
-
--- -----------------------------------------------------
--- Data for table `books`.`book_purchase`
--- -----------------------------------------------------
-START TRANSACTION;
-USE `books`;
-INSERT INTO `books`.`book_purchase` (`book_id`, `book_retailer_id`, `purchase_price`, `purchase_date`) VALUES (1, 1, 25.23, '2021-04-11');
-INSERT INTO `books`.`book_purchase` (`book_id`, `book_retailer_id`, `purchase_price`, `purchase_date`) VALUES (2, 1, 20.18, '2022-04-18');
-INSERT INTO `books`.`book_purchase` (`book_id`, `book_retailer_id`, `purchase_price`, `purchase_date`) VALUES (3, 1, 33.96, '2006-10-2');
-INSERT INTO `books`.`book_purchase` (`book_id`, `book_retailer_id`, `purchase_price`, `purchase_date`) VALUES (6, 1, 32.78, '2013-03-15');
-INSERT INTO `books`.`book_purchase` (`book_id`, `book_retailer_id`, `purchase_price`, `purchase_date`) VALUES (7, 1, 41.45, '2021-04-11');
-INSERT INTO `books`.`book_purchase` (`book_id`, `book_retailer_id`, `purchase_price`, `purchase_date`) VALUES (8, 1, 29.99, '2019-02-13');
-
-COMMIT;
