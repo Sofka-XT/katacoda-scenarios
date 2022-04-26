@@ -4,7 +4,7 @@ Ejecutar la siguiente instrucción:
 ¿En que linea de código se realizó el ultimo cambio?
 
 ***Responder en el Campus***
-A. linea 1
-A. linea 30
-A. linea 34
-A. linea 36
+- A. linea 1
+- B. linea 30
+- C. linea 34
+- D. linea 36
