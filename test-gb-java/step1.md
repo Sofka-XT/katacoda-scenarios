@@ -4,16 +4,11 @@ En esta serie de pruebas vamos a realizar algunos ejercios para evaluar conocimi
 
 **RESPONDER A CONTINUACIÓN**
 ```java
-public class Test1   
-{  
-
-    public static void main (String args[])   
-    {  
-
+public class Test1{  
+    public static void main (String args[]){  
         System.out.println(100 + 100 +"Test1");   
         System.out.println("SofkaU" + 100 + 100);  
     }  
-
 }
 ```
 
