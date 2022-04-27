@@ -1,0 +1,1 @@
+Bienvenido a la prataforma de laboratorio para trabajar las practicas de diagnostico del banco general de panama. Realizar todos los pasos en la medida que va respondiendo dentro del campus de Sofka U.

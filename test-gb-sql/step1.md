@@ -5,6 +5,7 @@ Espere que termine de instalar el ambiente, ingrese un usuario y contraseña y p
 `/usr/bin/mysql -u root -p`{{execute}}
 
 *Migrar datos*
+
 `source db.sql`{{execute}}
 
 **Consulta de validación**
